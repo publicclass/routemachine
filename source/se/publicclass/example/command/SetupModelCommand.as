@@ -1,0 +1,1 @@
+package se.publicclass.example.command {	import org.puremvc.as3.interfaces.INotification;	import org.puremvc.as3.patterns.command.SimpleCommand;	/**	 * @author Robert Sköld, robert(at)publicclass.se	 */	public class SetupModelCommand extends SimpleCommand {				override public function execute( notification : INotification ) : void {			// TODO Proxy some data		}	}}

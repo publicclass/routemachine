@@ -33,9 +33,12 @@ package org.puremvc.as3.utilities.routes {
 		}
 
 		override public function onRegister() : void {
+			SWFAddress.addEventListener( SWFAddressEvent.INIT, onAddressInit );
 			SWFAddress.addEventListener( SWFAddressEvent.CHANGE, onAddressChange );
-			// TODO Make sure this goto doesn't mess with a direct deep link
-			sendNotification( RouteMachine.GOTO , {}, initialRoute );
+		}
+		
+		private function onAddressInit(event : SWFAddressEvent) : void {
+			sendNotification( RouteMachine.GOTO , {}, event.value || initialRoute );
 		}
 
 		override public function onRemove() : void {

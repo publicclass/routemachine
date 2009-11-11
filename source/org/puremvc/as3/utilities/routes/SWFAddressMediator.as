@@ -12,19 +12,18 @@ package org.puremvc.as3.utilities.routes {
 		public static const NAME : String = "SWFAddressMediator";
 		
 		private var _currentRoute : String;
-		private var _ignoreChange : Boolean = false;
 
 		public function SWFAddressMediator( initialRoute : String ) {
 			super( NAME, initialRoute );
 		}
 
 		override public function listNotificationInterests() : Array {
-			return super.listNotificationInterests( ).concat( [ RouteMachine.INVALID ] );
+			return super.listNotificationInterests( ).concat( [ RouteMachine.routes::INVALID ] );
 		}
 
 		override public function handleNotification(notification : INotification) : void {
 			switch( notification.getName( ) ) {
-				case RouteMachine.INVALID:
+				case RouteMachine.routes::INVALID:
 					if( initialRoute )
 						sendNotification( RouteMachine.GOTO, null, initialRoute );
 					break;
@@ -38,30 +37,37 @@ package org.puremvc.as3.utilities.routes {
 		}
 		
 		private function onAddressInit(event : SWFAddressEvent) : void {
-			sendNotification( RouteMachine.GOTO , {}, event.value || initialRoute );
+			sendNotification( RouteMachine.GOTO , null, event.value || initialRoute );
+		}
+		
+		private function onAddressChange(event : SWFAddressEvent) : void {
+			if( RouteMachine.DEBUG )  RouteMachine.DEBUG_LOG( "SWFAddressMediator#onAddressChange: Current: " + _currentRoute , "To: " + event.value );
+			
+			// Only sends a cancel if the application won't throw errors
+			if( RouteMachine.routes::IGNORE_FAILED_CONTINUE ) 
+				sendNotification( RouteMachine.CANCEL );
+				 
+			sendNotification( RouteMachine.GOTO , null, event.value );
 		}
 
 		override public function onRemove() : void {
+			SWFAddress.removeEventListener( SWFAddressEvent.INIT, onAddressInit );
 			SWFAddress.removeEventListener( SWFAddressEvent.CHANGE, onAddressChange );
 		}
 
 		override public function onChangedRoute( notification : RouteNotification ) : void {
-			changeAddress( notification.toRoute );
+			changeAddress( notification.routes::nextRoute.injectData( notification.toData ) );
 		}
 		
 		private function changeAddress( location : String ) : void {
-			if( RouteMachine.DEBUG )  trace( "RouteMachine#From: " + _currentRoute , "To: " + location );
+			if( RouteMachine.DEBUG )  RouteMachine.DEBUG_LOG( "SWFAddressMediator#changeAddress: From: " + _currentRoute , "To: " + location );
 			if( location == _currentRoute ) return;
-			_ignoreChange = true;
+			SWFAddress.removeEventListener( SWFAddressEvent.CHANGE, onAddressChange );
 			SWFAddress.setValue( location );
-			_ignoreChange = false;
+			SWFAddress.addEventListener( SWFAddressEvent.CHANGE, onAddressChange );
+			_currentRoute = location;
 		}
-		
-		private function onAddressChange(e : SWFAddressEvent) : void {	
-			if( _ignoreChange ) return;
-			sendNotification( RouteMachine.GOTO , {}, e.value );
-		}
-		
+
 		public function get initialRoute() : String {
 			return viewComponent as String;
 		}

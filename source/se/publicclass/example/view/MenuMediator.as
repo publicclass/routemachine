@@ -1,8 +1,8 @@
 package se.publicclass.example.view {
-	import org.puremvc.as3.utilities.routes.RouteMachine;
 	import se.publicclass.example.ApplicationRoutes;
 	import se.publicclass.example.view.components.Menu;
 
+	import org.puremvc.as3.utilities.routes.RouteMachine;
 	import org.puremvc.as3.utilities.routes.RouteNotification;
 	import org.puremvc.as3.utilities.routes.RoutedMediator;
 
@@ -19,6 +19,12 @@ package se.publicclass.example.view {
 			super( NAME, viewComponent );
 		}
 
+		override public function onExitingRoute(notification : RouteNotification) : void {
+			menu.setActive( null );
+			if( notification.toRoute != ApplicationRoutes.PORTFOLIO )
+				menu.hideSubMenu();
+		}
+
 		override public function onChangedRoute(notification : RouteNotification) : void {
 			switch( notification.toRoute ) {
 				case ApplicationRoutes.START:
@@ -28,8 +34,14 @@ package se.publicclass.example.view {
 					menu.setActive( Menu.ABOUT );
 					break;
 				case ApplicationRoutes.PORTFOLIO:
-					menu.setActive( Menu.PORTFOLIO );
-					// TODO Check for sub page
+					switch( String( notification.toData.page ) ) {
+						case "1": menu.setActive( Menu.PORTFOLIO_1 ); break;
+						case "2": menu.setActive( Menu.PORTFOLIO_2 ); break;
+						case "3": menu.setActive( Menu.PORTFOLIO_3 ); break;
+						default:
+							menu.setActive( Menu.PORTFOLIO );
+							menu.showSubMenu();
+					}
 					break;
 				case ApplicationRoutes.CONTACT:
 					menu.setActive( Menu.CONTACT );
@@ -49,8 +61,20 @@ package se.publicclass.example.view {
 				case Menu.PORTFOLIO:
 					sendNotification( RouteMachine.GOTO, {}, ApplicationRoutes.PORTFOLIO );
 					break;
+				case Menu.PORTFOLIO_1:
+					sendNotification( RouteMachine.GOTO, { page: 1 }, ApplicationRoutes.PORTFOLIO );
+					break;
+				case Menu.PORTFOLIO_2:
+					sendNotification( RouteMachine.GOTO, { page: 2 }, ApplicationRoutes.PORTFOLIO );
+					break;
+				case Menu.PORTFOLIO_3:
+					sendNotification( RouteMachine.GOTO, { page: 3 }, ApplicationRoutes.PORTFOLIO );
+					break;
 				case Menu.CONTACT:
 					sendNotification( RouteMachine.GOTO, {}, ApplicationRoutes.CONTACT );
+					break;
+				default:
+					sendNotification( RouteMachine.GOTO, {}, ApplicationRoutes.START );
 					break;
 			}
 		}

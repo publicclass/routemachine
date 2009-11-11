@@ -2,7 +2,6 @@ package se.publicclass.example {
 	import se.publicclass.example.command.StartupCommand;
 
 	import org.puremvc.as3.patterns.facade.Facade;
-	import org.puremvc.as3.patterns.observer.Notification;
 
 	/**
 	 * @author Robert Sköld, robert(at)publicclass.se
@@ -22,7 +21,7 @@ package se.publicclass.example {
 		}
 
 		public function startup( app : Example ) : void {
-			notifyObservers( new Notification( STARTUP, app ) );
+			sendNotification( ApplicationConstants.STARTUP , app );
 		}
 	}
 }

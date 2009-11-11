@@ -1,0 +1,1 @@
+package se.publicclass.debug {	/**	 * @author Robert Sköld, robert(at)publicclass.se	 */	public interface ILogger {		function setLevel( level : int ):void;		function log( log : Log ):void;	}}

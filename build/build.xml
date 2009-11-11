@@ -20,9 +20,28 @@
 	</target>
 
 	<target name="SWC">
-		<!-- TODO Could we extract a version number from route machine? -->
+		<!-- Extract a version number from route machine? -->
+		<property name="versionedFile" location="${basedir}/source/org/puremvc/as3/utilities/routes/RouteMachine.as"/>
+	    <script language="javascript">
+	        regex = /VERSION.+?"([\d\.]+)";/;
+	        r = new java.io.BufferedReader(new java.io.FileReader(new java.io.File(versionedFile)));
+	        line = r.readLine();
+	        while ( (line = r.readLine()) != null) {
+	            m = regex.exec(line);
+	            if (m) {
+            		// create and use a Task via Ant API
+    				prop = project.createTask("property");
+	    			prop.setName("version");
+	    			prop.setValue(m[1]);
+	    			prop.perform();
+	    			break;
+	            }
+	        }
+	        r.close();
+	    </script>
+		
 		<antcall target="compiler.swc">
-			<param name="output" value="PureMVC_RouteMachine.swc" />
+			<param name="output" value="PureMVC_RouteMachine-${version}.swc" />
 		</antcall>
 	</target>
 
@@ -147,7 +166,7 @@
 	</target>
 
 	<target name="compiler.swc" description="Generates a swc.">
-		<echo>Generating SWC using '${dir.classes}'</echo>
+		<echo>Generating SWC (${output}) using '${dir.classes}'</echo>
 		<!-- Needs one arguments, output -->
 		<fail unless="output">No main output set.</fail>
 		<exec executable="${exec.compc}">

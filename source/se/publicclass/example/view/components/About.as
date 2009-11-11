@@ -1,11 +1,27 @@
 package se.publicclass.example.view.components {
+	import flash.text.TextField;
 
 	/**
 	 * @author Robert Sköld, robert(at)publicclass.se
 	 */
 	public class About extends Content {
 		public function About() {
-			createTextField( "Fusce at ipsum vel diam ullamcorper convallis. Morbi aliquet cursus lacus. Nunc nisi ligula, accumsan sit amet, condimentum nec, ullamcorper a, lectus. Vestibulum ut lectus. Ut rutrum mi nec lectus. Morbi quis nibh. Pellentesque congue, lorem quis porta tincidunt, tellus tortor venenatis leo, vel porttitor massa massa nec dui. In interdum euismod magna. In hac habitasse platea dictumst. Donec erat. Donec nunc ipsum, lobortis ac, feugiat sit amet, vehicula et, tellus. Donec in lacus ac metus condimentum gravida. Duis vehicula. In a neque in purus hendrerit molestie. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas." );		
+			var txt : TextField = createTextField( "Suspendisse vitae nibh. Curabitur laoreet auctor velit. " +
+			"Class aptent taciti sociosqu ad litora torquent per conubia nostra, per " +
+			"inceptos hymenaeos. Etiam tortor. Sed porta diam vel augue. Praesent sollicitudin " +
+			"blandit lectus. Duis interdum, arcu vel convallis porttitor, magna tellus auctor " +
+			"odio, ac lobortis nulla orci vel lacus. Morbi tortor justo, sagittis et, interdum " +
+			"eget, placerat et, metus. Ut quis massa. Phasellus leo nulla, tempus sed, mattis " +
+			"mattis, sodales in, urna. Fusce in purus. Curabitur a lorem quis dolor ultrices " +
+			"egestas. Maecenas dolor elit, tincidunt vel, tempor ac, imperdiet a, quam. Nullam " +
+			"justo. Morbi sagittis. Ut suscipit pulvinar ante. Cras eu tortor. In nonummy, erat " +
+			"eget aliquet molestie, sapien eros pretium lorem, eu pretium urna neque eu purus. " +
+			"Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos " +
+			"hymenaeos. Pellentesque scelerisque lorem ut ligula." , 400 );
+			txt.selectable = true;
+			
+			y = 120;
+			x = 40;
 		}
 	}
 }

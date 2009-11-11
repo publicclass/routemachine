@@ -92,8 +92,7 @@ package se.publicclass.example.view.components {
 			item.buttonMode = true;
 			item.mouseChildren = false;
 			item.addChild( createTextField( "<h3><a>" + label + "</a></h3>" ) );
-			_items[ label ] = item;
-			return item as Sprite;
+			return _items[ label ] = item;
 		}
 	}
 }

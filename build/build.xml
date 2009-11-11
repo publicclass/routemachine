@@ -287,7 +287,8 @@ package {
 	</target>
 	
  	<target name="docs.clean" description="Cleans out the documentation directory.">
- 		<echo>Cleaning out docs from '${docsdir}'...</echo>
+ 		<echo>Cleaning out docs from '${dir.docs}'...</echo>
+ 		<mkdir dir="${dir.docs}"/>
  		<delete includeemptydirs="true">
  			<fileset dir="${dir.docs}" includes="**/*"></fileset>
  		</delete>
@@ -295,23 +296,21 @@ package {
 	
 	<target name="docs.generate" description="Generates the source documentation using the asdoc executable." depends="docs.clean">
 		<exec executable="${exec.asdoc}">
-			<!-- TODO These should be an argument --> 
-			<arg line="-doc-sources='${dir.classes}'/com" />
-			<arg line="-doc-sources='${dir.classes}'/org" />
-			<arg line="-doc-sources='${dir.classes}'/de" />
+			<arg line="-doc-classes org.puremvc.as3.utilities.routes.RouteMachine org.puremvc.as3.utilities.routes.SWFAddressMediator" />
+			<arg line="-external-library-path='${dir.libs}'" />
 			<arg line="-source-path='${dir.classes}'" />
 			<arg line="-output='${dir.docs}'" />
-			<arg line="-main-title '${ant.project.name} API'" />
-			<arg line="-window-title '${ant.project.name} API'" />
+			<arg line="-main-title '${project.name} API'" />
+			<arg line="-window-title '${project.name} API'" />
 		</exec>
 	</target>
 			
 	<target name="docs.deploy" description="Generates the docs and archives it as a zip for easy deployment." depends="docs.generate">
 		<tstamp/>
-		<zip destfile="${basedir}/docs.zip">
+		<zip destfile="${basedir}/tmp-docs.zip">
 			<fileset dir="${dir.docs}" />
 		</zip>
-		<move file="${basedir}/docs.zip" tofile="${basedir}/docs-${DSTAMP}.zip" />
+		<move file="${basedir}/tmp-docs.zip" tofile="${basedir}/docs-${DSTAMP}.zip" />
 		<!-- TODO SFTP and unarchive it directly on the server, maybe only if we have a build.deploy.properties file? -->
 	</target>
 	

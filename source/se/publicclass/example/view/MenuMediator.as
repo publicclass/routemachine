@@ -34,12 +34,12 @@ package se.publicclass.example.view {
 					menu.setActive( Menu.ABOUT );
 					break;
 				case ApplicationRoutes.PORTFOLIO:
+					menu.setActive( Menu.PORTFOLIO );
 					switch( String( notification.toData.page ) ) {
 						case "1": menu.setActive( Menu.PORTFOLIO_1 ); break;
 						case "2": menu.setActive( Menu.PORTFOLIO_2 ); break;
 						case "3": menu.setActive( Menu.PORTFOLIO_3 ); break;
 						default:
-							menu.setActive( Menu.PORTFOLIO );
 							menu.showSubMenu();
 					}
 					break;

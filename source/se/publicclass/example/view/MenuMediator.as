@@ -59,7 +59,7 @@ package se.publicclass.example.view {
 					sendNotification( RouteMachine.GOTO, {}, ApplicationRoutes.ABOUT );
 					break;
 				case Menu.PORTFOLIO:
-					sendNotification( RouteMachine.GOTO, {}, ApplicationRoutes.PORTFOLIO );
+					sendNotification( RouteMachine.GOTO, null, ApplicationRoutes.PORTFOLIO );
 					break;
 				case Menu.PORTFOLIO_1:
 					sendNotification( RouteMachine.GOTO, { page: 1 }, ApplicationRoutes.PORTFOLIO );

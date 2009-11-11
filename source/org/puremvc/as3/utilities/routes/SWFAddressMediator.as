@@ -41,7 +41,7 @@ package org.puremvc.as3.utilities.routes {
 		}
 		
 		private function onAddressChange(event : SWFAddressEvent) : void {
-			if( RouteMachine.DEBUG )  RouteMachine.DEBUG_LOG( "SWFAddressMediator#onAddressChange: Current: " + _currentRoute , "To: " + event.value );
+			if( RouteMachine.VERBOSE )  RouteMachine.TRACE_LOG( "SWFAddressMediator#onAddressChange: Current: " + _currentRoute , "To: " + event.value );
 			
 			// Only sends a cancel if the application won't throw errors
 			if( RouteMachine.routes::IGNORE_FAILED_CONTINUE ) 
@@ -60,7 +60,7 @@ package org.puremvc.as3.utilities.routes {
 		}
 		
 		private function changeAddress( location : String ) : void {
-			if( RouteMachine.DEBUG )  RouteMachine.DEBUG_LOG( "SWFAddressMediator#changeAddress: From: " + _currentRoute , "To: " + location );
+			if( RouteMachine.VERBOSE )  RouteMachine.TRACE_LOG( "SWFAddressMediator#changeAddress: From: " + _currentRoute , "To: " + location );
 			if( location == _currentRoute ) return;
 			SWFAddress.removeEventListener( SWFAddressEvent.CHANGE, onAddressChange );
 			SWFAddress.setValue( location );

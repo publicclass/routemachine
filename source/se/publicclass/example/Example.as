@@ -15,9 +15,9 @@ package se.publicclass.example {
 			
 			Debug.addLogger(new TrazzleLogger());
 			
-			RouteMachine.DEBUG = true;
-			RouteMachine.DEBUG_LOG = Debug.trace;
-			RouteMachine.DEBUG_ERROR = Debug.error;
+			RouteMachine.VERBOSE = true;
+			RouteMachine.TRACE_LOG = Debug.trace;
+			RouteMachine.TRACE_ERROR = Debug.error;
 			
 			
 			stage.scaleMode = "noScale";

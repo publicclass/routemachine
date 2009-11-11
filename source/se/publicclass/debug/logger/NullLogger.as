@@ -1,1 +1,0 @@
-package se.publicclass.debug.logger {	import se.publicclass.debug.ILogger;	import se.publicclass.debug.Log;		/**	 * @author Robert Sköld, robert(at)publicclass.se	 */	public class NullLogger implements ILogger {				public function setLevel(level : int) : void {		}				public function log(log : Log) : void {		}	}}

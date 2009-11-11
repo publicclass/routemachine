@@ -1,2 +1,0 @@
-package se.publicclass.debug {
-	/**	 * @author Robert Sköld, robert(at)publicclass.se	 */	public class ErrorLevel {		public static var DEBUG : int = 0;		public static var INFO : int = 1;		public static var WARN : int = 2;		public static var ERROR : int = 3;		public static var FATAL : int = 4;		public static var NONE : int = 5;			}}

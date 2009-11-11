@@ -1,7 +1,7 @@
 RouteMachine
 ============
 
-A [http://puremvc.org](PureMVC) utility for ActionScript 3 to handle view states based on a url-like string (called "route").
+A [http://puremvc.org](PureMVC) utility for ActionScript 3 to handle view states based on an url-like string (called "route").
 
 Huh?
 ----
@@ -102,3 +102,14 @@ Ah, I thought you'd never ask! Well, from my experience, most of the times the t
 So while those things are running along we can tell send the RouteMachine and _RouteMachine.INTERRUPT_ notification to tell it to wait until further notice. So when the load of that asset has completed (which is SOOO important for that next view state) we tell the RouteMachine _RouteMachine.CONTINUE_ and the transitions to the next view state will continue.
 
 However, sometimes things doesn't go as desired. So let's say that load didn't work very well (we received an ErrorEvent from Loader) in that case, since the loading of that asset was so important, we instead send the RouteMachine a _RouteMachine.CANCEL_ notification to tell it to give up on that transition and let you get on with another one, like navigating to the _ApplicationRoutes.EPIC\_LOADING\_FAILURE_ route instead. 
+
+
+What's next?
+------------
+
+Well, besides getting it to the big *1.0* by using and testing it more I have these things on my todo:
+
+- Optimize the Route syntax. It's currently quite limited in how the variables can be defined and I'd also like it to be more flexible, so if someone thinks an url should be separated with "=" instead of "/" the RouteMachine would let them, but right now it's very "/"-friendly. And also I'd like some simple validation in those routes, so a route can say "This variable is not proper unless it's numbers, you hear?!" or something like that.
+- Port this sucker to [haXe](http://haxe.org). Why? Because we can, that's why! (and also because we like it).
+- I'm all ears, I want to simplify things of course, PureMVC itself is quite verbose (for a good reason) and anything to get it simpler is a good thing if you ask me.
+

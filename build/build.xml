@@ -1,17 +1,11 @@
 <?xml version="1.0"?> 
-<project name="${project.name}" basedir=".." default="ExampleApp"> 
+<project name="RouteMachine" basedir=".." default="ExampleApp"> 
 	<property file="${basedir}/build/build.${user.name}.properties" />
 	<property file="${basedir}/build/build.properties" />
-	<property name="linked" value=""  /> <!-- Defaults to empty unless extra libraries is needed to be linked (and fdt compile target isn't used) -->
-	<property name="extra" value=""  /> 
-	<property name="run.url" value="http://localhost/~${user.name}/publicclass/" />
 
-	<!-- 
-		##########################################
-		### Define the targets to compile here ###
-		########################################## 
-	-->
-
+	<import file="${dir.build}/tasks/compile.xml"/>
+	<import file="${dir.build}/tasks/docs.xml"/>
+	
 	<target name="ExampleApp">
 		<antcall target="${compiler.target}">
 			<param name="target" value="se/publicclass/example/Example.as" />
@@ -20,7 +14,7 @@
 	</target>
 
 	<target name="SWC">
-		<!-- Extract a version number from route machine? -->
+		<!-- Extract a version number from route machine -->
 		<property name="versionedFile" location="${basedir}/source/org/puremvc/as3/utilities/routes/RouteMachine.as"/>
 	    <script language="javascript">
 	        regex = /VERSION.+?"([\d\.]+)";/;
@@ -29,11 +23,7 @@
 	        while ( (line = r.readLine()) != null) {
 	            m = regex.exec(line);
 	            if (m) {
-            		// create and use a Task via Ant API
-    				prop = project.createTask("property");
-	    			prop.setName("version");
-	    			prop.setValue(m[1]);
-	    			prop.perform();
+	    			project.setProperty( "version" , m[1] );
 	    			break;
 	            }
 	        }
@@ -44,274 +34,11 @@
 			<param name="output" value="PureMVC_RouteMachine-${version}.swc" />
 		</antcall>
 	</target>
-
-	<!-- 
-		##################################################################################
-		### Don't change too much below this line, this is where all the magic happens ###
-		################################################################################## 
-	-->
-		
-	<target name="check.debug">
-		<condition property="config.debug">
-			<equals arg1="${compiler.debug}" arg2="true" />
-		</condition>
-	</target>
 	
-	<target name="compiler.fdt" description="Compiles a swf using FDTs ant tasks.">	
-		<!-- Needs two arguments, target and output -->
-		<fail unless="target">No main target class set.</fail>
-		<fail unless="output">No main output set.</fail>
-		<condition property="define" value='-define=CONFIG::DEBUG,"true" -define=CONFIG::RELEASE,"false"' else='-define=CONFIG::DEBUG,"false" -define=CONFIG::RELEASE,"true"'>
-			<equals arg1="${compiler.debug}" arg2="true" />
-		</condition>
-		<!-- Hack to fix the compile -->
-	    <fdt.launch.application 
-	    	projectname="${project.name}" 
-	    	mainclass="${dir.classes}/${target}"
-	    	debug="${compiler.debug}"
-	    	compilerarguments=' ${extra} ${define} -target-player=10.0.0'
-	    	target="${dir.deploy}/${output}" />
-		<!--antcall target="compiler.fdt.debugger" /-->
-	</target>
-	
-	<target name="compiler.fdt.debugger" depends="check.debug" if="config.debug">
-		<fdt.startDebugger projectname="${project.name}" />
-	</target>
-	
-	<target name="compiler.fdt.module" description="Compiles a module using FDTs ant tasks and the mains exclude xml.">
-	    <fdt.launch.application 
-	    	projectname="${project.name}" 
-	    	mainclass="${dir.classes}/${target}"
-	    	debug="${compiler.debug}"
-	    	compilerarguments="-load-externs ${basedir}/build/exclude.xml"
-	    	target="${dir.deploy}/${output}" />
-	</target>
-	
-	<target name="compiler.launch" description="Compiles and launches in browser.">
-		<antcall target="${compiler.target}">
-			<param name="target" value="${target}" />
-			<param name="output" value="${output}" />
+	<target name="docs">
+		<antcall target="docs.generate">
+			<param name="docClasses" value="org.puremvc.as3.utilities.routes.RouteMachine org.puremvc.as3.utilities.routes.SWFAddressMediator" />
 		</antcall>
-		<antcall target="launch.browser">
-			<param name="output" value="${output}" />
-		</antcall>
-	</target>
-
-	<target name="compiler.mxmlc" description="Compiles a swf using the mxmlc executable file.">
-		<!-- Needs two arguments, target and output -->
-		<fail unless="target">No main target class set.</fail>
-		<fail unless="output">No main output set.</fail>
-		<exec executable="${exec.mxmlc}">
-			<arg line="-source-path '${dir.classes}'" />
-			<arg line="${linked}" />
-			<arg line="-library-path '${dir.flex.libs}'" />
-			<arg line="-library-path '${dir.flex.locale}'" />
-			<arg line="-default-frame-rate=${stage.framerate}" />
-			<arg line="-default-background-color=${stage.bgcolor}" />
-			<arg line="-default-size ${stage.width} ${stage.height}" />
-			<arg line="-strict" />
-			<arg line="-debug" />
-			<arg line="-compiler.verbose-stacktraces" />
-			<arg line="-incremental" />
-			<arg line="'${dir.classes}/${target}'" />
-			<arg line="-output '${dir.deploy}/${output}'"/>
-			<arg line="-link-report '${dir.build}/exclude.xml'"/>
-		</exec>
-	</target>
-	
-	<target name="compiler.mxmlc.air" description="Compiles an air swf using the mxmlc executable file.">
-		<!-- Needs two arguments, target and output -->
-		<fail unless="target">No main target class set.</fail>
-		<fail unless="output">No main output set.</fail>
-		<exec executable="${exec.amxmlc}">
-			<arg line="-source-path '${dir.classes}'" />
-			<arg line="${linked}" />
-			<arg line="-library-path '${dir.flex.libs}'" />
-			<arg line="-library-path '${dir.flex.locale}'" />
-			<arg line="-default-frame-rate=${stage.framerate}" />
-			<arg line="-default-background-color=${stage.bgcolor}" />
-			<arg line="-default-size ${stage.width} ${stage.height}" />
-			<arg line="-strict=true" />
-			<arg line="-debug=${compiler.debug}" />
-			<arg line="-incremental=true" />
-			<arg line="'${dir.classes}/${target}'" />
-			<arg line="-output '${dir.deploy}/${output}'"/>
-			<arg line="-link-report '${dir.build}/exclude.xml'"/>
-		</exec>
-	</target>
-	
-	<target name="compiler.mxmlc.module" description="Compiles a module using the mxmlc executable file.">
-		<!-- Needs two arguments, target and output -->
-		<fail unless="target">No main target class set.</fail>
-		<fail unless="output">No main output set.</fail>
-
-        <exec executable="${exec.mxmlc}">
-			<arg line="-source-path '${dir.classes}'" />
-			<arg line="${linked}" />
-			<arg line="-default-frame-rate=${framerate}" />
-			<arg line="-default-background-color=${bgcolor}" />
-			<arg line="-default-size ${width} ${height}" />
-			<arg line="-library-path '${dir.flex.libs}'" />
-			<arg line="-library-path '${dir.flex.locale}'" />
-			<arg line="-default-frame-rate=${stage.framerate}" />
-			<arg line="-default-background-color=${stage.bgcolor}" />
-			<arg line="-default-size ${stage.width} ${stage.height}" />
-			<arg line="-strict=true" />
-			<arg line="-debug=${compiler.debug}" />
-			<arg line="-incremental=true" />
-			<arg line="'${dir.classes}/${target}'" />
-        	<arg line="-output '${dir.deploy}/${output}'"/>
-        	<arg line="-load-externs '${dir.build}/exclude.xml'"/>
-        </exec>
-	</target>
-
-	<target name="compiler.swc" description="Generates a swc.">
-		<echo>Generating SWC (${output}) using '${dir.classes}'</echo>
-		<!-- Needs one arguments, output -->
-		<fail unless="output">No main output set.</fail>
-		<exec executable="${exec.compc}">
-			<arg line="-library-path '${dir.libs}'"/>
-			<arg line="-library-path '${dir.flex.libs}'" />
-			<arg line="-library-path '${dir.flex.locale}'" />
-			<arg line="-source-path ${dir.classes}"/>
-            <arg line="-external-library-path '${dir.libs}'" />
-            <arg line="-external-library-path '${dir.flex.libs}/player/10/playerglobal.swc'" />
-			<arg line="-strict=true" />
-			<arg line="-optimize=true" />
-			<arg line="-debug=false" />
-			<arg line="-include-sources ${dir.classes}/org"/>
-			<arg line="-output ${dir.deploy}/${output}"/>
-		</exec>
-	</target>
-
-	<target name="launch.player" description="Launches the compiled output in the flash player. (Works only on Mac)">
-		<!-- Needs one arguments, output -->
-		<fail unless="output">No main output set.</fail>
-		<exec executable="open">
-			<arg line="-a ${run.flashplayer} '${dir.deploy}/${output}'" />
-		</exec>
-	</target>
-
-	<target name="launch.browser" description="Launches the compiled output in the browser. (Works only on Mac)">
-		<!-- Needs one arguments, output -->
-		<fail unless="output">No main output set.</fail>
-		<exec executable="open">
-			<arg line="-a ${run.browser} '${output}'" />
-		</exec>
-	</target>
-
-	<target name="launch.air">
-		<!-- Needs one argument, descriptor -->
-		<fail unless="descriptor">No main target class set.</fail>
-		<exec executable="${exec.adl}" spawn="true">
-			<arg value="${dir.deploy}/${descriptor}" />
-		</exec> 
-	</target>
-	
-	<target name="generate.font" description="Creates a SWF with embedded fonts.">
-		<fail unless="fontName">No font name set.</fail>
-		<fail unless="fontSources">No font sources set.</fail>
-		<fail unless="fontTypes">No main font types set.</fail>
-		<fail unless="unicodeRange">No unicode range set.</fail>
-		
-		<!-- Default unicodeRange should be:
-		
-		U+0020-U+00FF,U+2026,U+2122,U+20AC,U+2013,U+201C,U+201D
-		
-		(U+2026 is an ellipsis (...), U+20AC is euro sign, U+2013 is a long dash, U+201C and D is fancy quotes)
-		
-		-->
-		
-		<property name="fontFile" value="${basedir}/assets/fonts/Font${fontName}.as" />
-		
-		<echo file="${fontFile}">package {
-	import flash.display.Sprite;
-	public class Font${fontName} extends Sprite {
-		</echo>
-
-		<condition property="isBold"><contains string="${fontTypes}" substring="bold" casesensitive="false" trim="true" /></condition>
-		<echo file="${fontFile}" append="true">
-			[Embed(
-				source='saab_fonts/Gill____.ttf', 
-				fontName='${fontName}', 
-				mimeType='application/x-font', 
-				unicodeRange='U+0020-U+00FF,U+2026,U+2122,U+0400-U+045F,U+20AC,U+2013,U+201C,U+201D')] // U+0400-U+045F is cyrillic characters, U+2026 is an ellipsis (...), U+20AC is € sign, U+2013 is –, U+201C is and D is “, 
-	        public static var ${fontName}:Class;
-		</echo>
-		
-		<condition property="isItalic"><contains string="${fontTypes}" substring="italic" casesensitive="false" trim="true" /></condition>
-		<condition property="isBoldItalic"><contains string="${fontTypes}" substring="bolditalic" casesensitive="false" trim="true" /></condition>
-		
-		<!-- TODO Create a Font${fontName}.as containing:
-		
-package {
-	
-	import flash.display.Sprite;
-	
-	public class Font${fontName} extends Sprite {
-		
-		[Embed(
-			source='regular.ttf', 
-			fontName='${fontName}', 
-			mimeType='application/x-font', 
-			unicodeRange='U+0020-U+00FF,U+2026,U+2122,U+0400-U+045F,U+20AC,U+2013,U+201C,U+201D')] // U+0400-U+045F is cyrillic characters, U+2026 is an ellipsis (...), U+20AC is € sign, U+2013 is –, U+201C is and D is “, 
-        public static var ${fontName}:Class;
-        
-		[Embed(
-			source='bold.ttf',
-			fontName='${fontName}', 
-			fontWeight='bold', 
-			mimeType='application/x-font', 
-			unicodeRange='U+0020-U+00FF,U+2026,U+2122,U+0400-U+045F,U+20AC,U+2013,U+201C,U+201D')] // U+0400-U+045F is cyrillic characters, U+2026 is an ellipsis (...), U+20AC is € sign, U+2013 is –, U+201C is and D is “
-        public static var ${fontName}Bold:Class;
-        
-		[Embed(
-			source='italic.ttf', 
-			fontName='${fontName}', 
-			fontStyle='italic', 
-			mimeType='application/x-font', 
-			unicodeRange='U+0020-U+00FF,U+2026,U+2122,U+0400-U+045F,U+20AC,U+2013,U+201C,U+201D')] // U+0400-U+045F is cyrillic characters, U+2026 is an ellipsis (...), U+20AC is € sign, U+2013 is –, U+201C and D is “
-        public static var ${fontName}Italic:Class;
-        
-		[Embed(
-			source='boldItalic.ttf', 
-			fontName='${fontName}', 
-			fontStyle='italic', 
-			fontWeight='bold', 
-			mimeType='application/x-font', 
-			unicodeRange='U+0020-U+00FF,U+2026,U+2122,U+0400-U+045F,U+20AC,U+2013,U+201C,U+201D')] // U+0400-U+045F is cyrillic characters, U+2026 is an ellipsis (...), U+20AC is € sign, U+2013 is –, U+201C and D is “
-        public static var ${fontName}BoldItalic:Class;
-	}
-}
-		-->
-	</target>
-	
- 	<target name="docs.clean" description="Cleans out the documentation directory.">
- 		<echo>Cleaning out docs from '${dir.docs}'...</echo>
- 		<mkdir dir="${dir.docs}"/>
- 		<delete includeemptydirs="true">
- 			<fileset dir="${dir.docs}" includes="**/*"></fileset>
- 		</delete>
- 	</target>
-	
-	<target name="docs.generate" description="Generates the source documentation using the asdoc executable." depends="docs.clean">
-		<exec executable="${exec.asdoc}">
-			<arg line="-doc-classes org.puremvc.as3.utilities.routes.RouteMachine org.puremvc.as3.utilities.routes.SWFAddressMediator" />
-			<arg line="-external-library-path='${dir.libs}'" />
-			<arg line="-source-path='${dir.classes}'" />
-			<arg line="-output='${dir.docs}'" />
-			<arg line="-main-title '${project.name} API'" />
-			<arg line="-window-title '${project.name} API'" />
-		</exec>
-	</target>
-			
-	<target name="docs.deploy" description="Generates the docs and archives it as a zip for easy deployment." depends="docs.generate">
-		<tstamp/>
-		<zip destfile="${basedir}/tmp-docs.zip">
-			<fileset dir="${dir.docs}" />
-		</zip>
-		<move file="${basedir}/tmp-docs.zip" tofile="${basedir}/docs-${DSTAMP}.zip" />
-		<!-- TODO SFTP and unarchive it directly on the server, maybe only if we have a build.deploy.properties file? -->
 	</target>
 	
 </project> 

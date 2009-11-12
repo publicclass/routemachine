@@ -1,0 +1,158 @@
+<?xml version="1.0"?> 
+<project name="Compile" basedir="../..">
+	
+	<!-- Extra arguments to the compiler -->
+	<property name="compiler.extra" value=""/> 
+	<property name="project.version" value="bula"/> 
+		
+	<target name="check.debug">
+		<condition property="config.debug">
+			<equals arg1="${compiler.debug}" arg2="true" />
+		</condition>
+	</target>
+
+	<target name="check.version" description="Looks for a constant with the name VERSION in the specified file. And sets the 'project.version' property.">
+		<fail unless="file">Need a file to search in.</fail>
+		<script language="javascript">
+	        regex = /VERSION.+?"([\d\.]+)";/;
+	        r = new java.io.BufferedReader(new java.io.FileReader(new java.io.File(file)));
+	        line = r.readLine();
+	        while ( (line = r.readLine()) != null) {
+	            m = regex.exec(line);
+	            if (m) {
+	        		self.getProject().setProperty( "project.version" , m[1] );
+	    			break;
+	            }
+	        }
+	        r.close();
+	    </script>
+		<echo>${ant.project.name}-${project.version}</echo>
+	</target>
+	
+	<target name="compiler.fdt" description="Compiles a swf using FDTs ant tasks.">	
+		<!-- Needs two arguments, target and output -->
+		<fail unless="target">No main target class set.</fail>
+		<fail unless="output">No main output set.</fail>
+		<condition property="define" value='-define=CONFIG::DEBUG,"true" -define=CONFIG::RELEASE,"false" -define=CONFIG::VERSION,${compiler.version}"' else='-define=CONFIG::DEBUG,"false" -define=CONFIG::RELEASE,"true" -define=CONFIG::VERSION,${compiler.version}"'>
+			<equals arg1="${compiler.debug}" arg2="true" />
+		</condition>
+		<!-- Hack to fix the compile -->
+	    <fdt.launch.application 
+	    	projectname="${ant.project.name}" 
+	    	mainclass="${dir.classes}/${target}"
+	    	debug="${compiler.debug}"
+	    	compilerarguments=' ${compiler.extra} ${define} -target-player=${compiler.version}.0.0'
+	    	target="${dir.deploy}/${output}" />
+		<!--antcall target="compiler.fdt.debugger" /-->
+	</target>
+	
+	<target name="compiler.fdt.debugger" depends="check.debug" if="config.debug">
+		<fdt.startDebugger projectname="${ant.project.name}" />
+	</target>
+	
+	<target name="compiler.fdt.module" description="Compiles a module using FDTs ant tasks and the mains exclude xml.">
+	    <fdt.launch.application 
+	    	projectname="${project.name}" 
+	    	mainclass="${dir.classes}/${target}"
+	    	debug="${compiler.debug}"
+	    	compilerarguments="-load-externs ${basedir}/build/exclude.xml"
+	    	target="${dir.deploy}/${output}" />
+	</target>
+	
+	<target name="compiler.launch" description="Compiles and launches in browser.">
+		<antcall target="${compiler.target}">
+			<param name="target" value="${target}" />
+			<param name="output" value="${output}" />
+		</antcall>
+		<antcall target="launch.browser">
+			<param name="output" value="${output}" />
+		</antcall>
+	</target>
+
+	<target name="compiler.mxmlc" description="Compiles a swf using the mxmlc executable file.">
+		<!-- Needs two arguments, target and output -->
+		<fail unless="target">No main target class set.</fail>
+		<fail unless="output">No main output set.</fail>
+		<exec executable="${exec.mxmlc}">
+			<arg line="-source-path '${dir.classes}'" />
+			<arg line="-library-path '${dir.libs}'" />
+			<arg line="-library-path '${dir.flex.libs}'" />
+			<arg line="-library-path '${dir.flex.locale}'" />
+			<arg line="-default-frame-rate=${stage.framerate}" />
+			<arg line="-default-background-color=${stage.bgcolor}" />
+			<arg line="-default-size ${stage.width} ${stage.height}" />
+			<arg line="-strict" />
+			<arg line="-debug" />
+			<arg line="-compiler.verbose-stacktraces" />
+			<arg line="-incremental" />
+			<arg line="'${dir.classes}/${target}'" />
+			<arg line="-output '${dir.deploy}/${output}'"/>
+			<arg line="-link-report '${dir.build}/exclude.xml'"/>
+		</exec>
+	</target>
+	
+	<target name="compiler.mxmlc.air" description="Compiles an air swf using the mxmlc executable file.">
+		<!-- Needs two arguments, target and output -->
+		<fail unless="target">No main target class set.</fail>
+		<fail unless="output">No main output set.</fail>
+		<exec executable="${exec.amxmlc}">
+			<arg line="-source-path '${dir.classes}'" />
+			<arg line="${linked}" />
+			<arg line="-library-path '${dir.flex.libs}'" />
+			<arg line="-library-path '${dir.flex.locale}'" />
+			<arg line="-default-frame-rate=${stage.framerate}" />
+			<arg line="-default-background-color=${stage.bgcolor}" />
+			<arg line="-default-size ${stage.width} ${stage.height}" />
+			<arg line="-strict=true" />
+			<arg line="-debug=${compiler.debug}" />
+			<arg line="-incremental=true" />
+			<arg line="'${dir.classes}/${target}'" />
+			<arg line="-output '${dir.deploy}/${output}'"/>
+			<arg line="-link-report '${dir.build}/exclude.xml'"/>
+		</exec>
+	</target>
+	
+	<target name="compiler.mxmlc.module" description="Compiles a module using the mxmlc executable file.">
+		<!-- Needs two arguments, target and output -->
+		<fail unless="target">No main target class set.</fail>
+		<fail unless="output">No main output set.</fail>
+
+        <exec executable="${exec.mxmlc}">
+			<arg line="-source-path '${dir.classes}'" />
+			<arg line="${linked}" />
+			<arg line="-default-frame-rate=${framerate}" />
+			<arg line="-default-background-color=${bgcolor}" />
+			<arg line="-default-size ${width} ${height}" />
+			<arg line="-library-path '${dir.flex.libs}'" />
+			<arg line="-library-path '${dir.flex.locale}'" />
+			<arg line="-default-frame-rate=${stage.framerate}" />
+			<arg line="-default-background-color=${stage.bgcolor}" />
+			<arg line="-default-size ${stage.width} ${stage.height}" />
+			<arg line="-strict=true" />
+			<arg line="-debug=${compiler.debug}" />
+			<arg line="-incremental=true" />
+			<arg line="'${dir.classes}/${target}'" />
+        	<arg line="-output '${dir.deploy}/${output}'"/>
+        	<arg line="-load-externs '${dir.build}/exclude.xml'"/>
+        </exec>
+	</target>
+
+	<target name="compiler.swc" description="Generates a swc.">
+		<echo>Generating SWC using '${dir.classes}' into '${output}'</echo>
+		<!-- Needs one argument: output -->
+		<fail unless="output">No main output set.</fail>
+		<exec executable="${exec.compc}">
+			<arg line="-library-path '${dir.libs}'"/>
+			<arg line="-library-path '${dir.flex.libs}'" />
+			<arg line="-library-path '${dir.flex.locale}'" />
+			<arg line="-source-path ${dir.classes}"/>
+            <arg line="-external-library-path '${dir.libs}'" />
+            <arg line="-external-library-path '${dir.flex.libs}/player/${compiler.version}/playerglobal.swc'" />
+			<arg line="-strict=true" />
+			<arg line="-optimize=true" />
+			<arg line="-debug=false" />
+			<arg line="-include-sources ${dir.classes}/se"/>
+			<arg line="-output ${dir.deploy}/${output}"/>
+		</exec>
+	</target>
+</project>

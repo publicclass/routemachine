@@ -39,9 +39,8 @@ package se.publicclass.example.view {
 						case "1": menu.setActive( Menu.PORTFOLIO_1 ); break;
 						case "2": menu.setActive( Menu.PORTFOLIO_2 ); break;
 						case "3": menu.setActive( Menu.PORTFOLIO_3 ); break;
-						default:
-							menu.showSubMenu();
 					}
+					menu.showSubMenu();
 					break;
 				case ApplicationRoutes.CONTACT:
 					menu.setActive( Menu.CONTACT );

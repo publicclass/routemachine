@@ -31,13 +31,14 @@
 	    </script>
 		
 		<antcall target="compiler.swc">
+			<param name="classes.swc" value="org.puremvc.as3.utilities.routes.RouteMachine,org.puremvc.as3.utilities.routes.SWFAddressMediator" />
 			<param name="output" value="PureMVC_RouteMachine-${version}.swc" />
 		</antcall>
 	</target>
 	
 	<target name="docs">
 		<antcall target="docs.generate">
-			<param name="docClasses" value="org.puremvc.as3.utilities.routes.RouteMachine org.puremvc.as3.utilities.routes.SWFAddressMediator" />
+			<param name="classes.doc" value="org.puremvc.as3.utilities.routes.RouteMachine,org.puremvc.as3.utilities.routes.SWFAddressMediator" />
 		</antcall>
 	</target>
 	
